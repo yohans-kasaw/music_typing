@@ -1,45 +1,47 @@
 import { useState, useEffect, useRef } from "react"
 import Letter from "./Letter";
 
-
-interface Lyrics {
-  lyrics: string,
-  title: string,
-  artist: string,
-  album: string,
-}
+import { SongDetails } from "../domain/lyrics";
 
 function Test() {
   const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (inputRef.current && inputRef.current)
-      inputRef.current.focus();
-  }, []);
-
-  const [jsonData, setJsonData] = useState('noting here');
-
-  useEffect(() => {
-    fetch('/public/lyrics/save_your_tears.json').then(response => response.json()).then(data => {
-      if (!data) return;
-      setJsonData(data.lyrics)
-    })
-  }, []);
-
-  const testingText = jsonData
-
-  if (!testingText)
-    return <div>Loading...</div>;
-
-  // load a json file form assets folder
-  //
-  let lines = jsonData.split('\n').map((line: string) => line.trim().split(' '));
-
-
 
   let [currentText, setCurrentText] = useState("")
   let [lineIndex, setLineIndex] = useState(0)
   let [wordIndex, setWordIndex] = useState(0)
   let [currentWordError, setCurrentWordError] = useState(false)
+
+  const [songData, setSongData] = useState<SongDetails | null>(null);
+
+  useEffect(() => {
+    if (inputRef.current && inputRef.current)
+      inputRef.current.focus();
+    const fetchSongDetails = async () => {
+      try {
+        const response = await fetch('/public/lyrics/Blinding.json');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data: SongDetails = await response.json();
+        setSongData(data);
+      } catch (error) {
+        throw new Error('Error fetching song details');
+      }
+    };
+
+    fetchSongDetails();
+  }, []);
+
+  if (!songData) {
+    return <div>Loading...</div>;
+  }
+
+  const { lyrics } = songData;
+
+  let lines = lyrics.split('\n').map((line: string) => line.trim().split(' '));
+  // slice the line after index 13
+  lines = lines.slice(13, 20);
+
 
   function spaceKeyHandler(e: any) {
     if (e.key === " ") {
@@ -61,12 +63,31 @@ function Test() {
     }
   }
 
+  function onInputChange(e: any) {
+    let inputText = e.target.value
+    let inputTextLength = inputText.length
+    setCurrentText(inputText)
+
+    // if length less than or equal, and so far correct
+    if (inputTextLength <= lines[lineIndex][wordIndex].length && lines[lineIndex][wordIndex].startsWith(inputText)) {
+      setCurrentWordError(false)
+    } else {
+      setCurrentWordError(true)
+    }
+
+
+  }
+
   function isCurrentWord(i: number, j: number) {
     return i === lineIndex && j === wordIndex
   }
 
   function getCurrentWordColor() {
     return currentWordError ? 'red' : 'blue'
+  }
+
+  function wordIsTyped(i: number, j: number) {
+    return i < lineIndex || (i === lineIndex && j < wordIndex)
   }
 
   return (
@@ -78,7 +99,7 @@ function Test() {
               <p>
                 <span>{line.map((word, j) => {
 
-                  return (<span><span style={{ backgroundColor: isCurrentWord(i, j) ? getCurrentWordColor() : '' }}>{word.split('').map((l) => <Letter>{l}</Letter>)
+                  return (<span><span style={{ backgroundColor: isCurrentWord(i, j) ? getCurrentWordColor() : '', color: wordIsTyped(i, j) ? 'green' : '' }}>{word.split('').map((l) => <Letter>{l}</Letter>)
 
                   }</span> </span>)
                 })}</span>
@@ -87,11 +108,11 @@ function Test() {
           })
         }
       </div>
-
-      <div>
-        {wordIndex} {lineIndex} {currentText} x<span>{lines[lineIndex][wordIndex]}</span>x
+      <div className="mt-4">
+        <p>Line: {lineIndex + 1}</p>
+        <p>Word: {wordIndex + 1}</p>
+        <p>Current word: {lines[lineIndex][wordIndex]}</p>
       </div>
-
       <div className="mt-4">
         <input
           className={`w-full p-2 border rounded-md focus:outline-none 
@@ -100,7 +121,7 @@ function Test() {
           style={{ borderColor: currentWordError ? 'red' : 'blue' }}
           type="text"
           placeholder="Type here"
-          onChange={(e) => setCurrentText(e.target.value)}
+          onChange={onInputChange}
           onKeyDown={spaceKeyHandler}
           value={currentText}
           ref={inputRef}

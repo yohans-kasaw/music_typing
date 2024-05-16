@@ -10,6 +10,12 @@ def save_lyrics_to_json(lyrics, title, artist, album, filename):
     lyrics = re.sub(r'\[.*?\]', '', lyrics)
     lyrics = re.sub(r'\(.*?\)', '', lyrics)
     
+    # Remove extra spaces
+    lyrics = re.sub(r' +', ' ', lyrics)
+    
+    # Remove blank lines
+    lyrics = re.sub(r'\n\s*\n', '\n', lyrics)
+    
     # Create the song details dictionary
     song_details = {
         "lyrics": lyrics,

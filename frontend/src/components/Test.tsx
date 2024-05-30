@@ -14,8 +14,12 @@ function Test() {
   const [songData, setSongData] = useState<SongDetails | null>(null);
 
   useEffect(() => {
-    if (inputRef.current && inputRef.current)
+    if (inputRef.current) {
       inputRef.current.focus();
+    }
+  }, [songData]);
+
+  useEffect(() => {
     const fetchSongDetails = async () => {
       try {
         const response = await fetch('/public/lyrics/Blinding.json');
@@ -39,9 +43,6 @@ function Test() {
   const { lyrics } = songData;
 
   let lines = lyrics.split('\n').map((line: string) => line.trim().split(' '));
-  // slice the line after index 13
-  lines = lines.slice(13, 20);
-
 
   function spaceKeyHandler(e: any) {
     if (e.key === " ") {
@@ -74,32 +75,49 @@ function Test() {
     } else {
       setCurrentWordError(true)
     }
-
-
   }
+
+  function isLineVisible(i: number, numberOfLines: number = 3): boolean {
+    const start = Math.max(0, Math.min(lineIndex - Math.floor(numberOfLines / 2), lines.length - numberOfLines));
+    const end = Math.min(lines.length - 1, start + numberOfLines - 1);
+    return i >= start && i <= end;
+  }
+
 
   function isCurrentWord(i: number, j: number) {
     return i === lineIndex && j === wordIndex
-  }
-
-  function getCurrentWordColor() {
-    return currentWordError ? 'red' : 'blue'
   }
 
   function wordIsTyped(i: number, j: number) {
     return i < lineIndex || (i === lineIndex && j < wordIndex)
   }
 
+  function getClass(i: number, j: number) {
+    if (wordIsTyped(i, j)) {
+      return 'text-green-400'
+    }
+
+    if (isCurrentWord(i, j)) {
+      return currentWordError ? 'bg-red-800 font-bold text-white-900' : 'font-bold text-[#ff6b6b]'
+    }
+
+
+  }
+
   return (
-    <>
-      <div className="bg-gray-900 p-6 rounded-lg shadow-md h-1/2 overflow-scroll">
+    <div>
+
+      <div className="bg-[#2b2b2b] rounded-lg p-6 mb-6 flex flex-col items-center">
         {
           lines.map((line, i) => {
+            if (!isLineVisible(i, 5)) {
+              return null;
+            }
             return (
               <p>
                 <span>{line.map((word, j) => {
 
-                  return (<span><span style={{ backgroundColor: isCurrentWord(i, j) ? getCurrentWordColor() : '', color: wordIsTyped(i, j) ? 'green' : '' }}>{word.split('').map((l) => <Letter>{l}</Letter>)
+                  return (<span><span className={getClass(i, j)} >{word.split('').map((l) => <Letter>{l}</Letter>)
 
                   }</span> </span>)
                 })}</span>
@@ -108,17 +126,10 @@ function Test() {
           })
         }
       </div>
-      <div className="mt-4">
-        <p>Line: {lineIndex + 1}</p>
-        <p>Word: {wordIndex + 1}</p>
-        <p>Current word: {lines[lineIndex][wordIndex]}</p>
-      </div>
-      <div className="mt-4">
+
+      <div className="w-full flex justify-center">
         <input
-          className={`w-full p-2 border rounded-md focus:outline-none 
-                        ${currentWordError ? 'border-red-500 focus:ring-red-500' : 'border-blue-500 focus:ring-blue-500'} 
-                        focus:border-transparent`}
-          style={{ borderColor: currentWordError ? 'red' : 'blue' }}
+          className="bg-[#2b2b2b] border-none rounded-lg px-4 py-2 w-full max-w-md text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b6b]"
           type="text"
           placeholder="Type here"
           onChange={onInputChange}
@@ -127,7 +138,12 @@ function Test() {
           ref={inputRef}
         />
       </div>
-    </>
+      <div className="text-[0.5rem] py-1">
+        <p>Line: {lineIndex + 1} /
+          Word: {wordIndex + 1} /
+          Current word: {lines[lineIndex][wordIndex]}</p>
+      </div>
+    </div>
   )
 }
 

@@ -1,10 +1,10 @@
-import Test from './components/Test'
+import TestScreen from './components/screen'
 
 function App() {
   return (
-    <div className='flex justify-center w-screen'>
+    <div>
       <div>
-        <Test />
+        <TestScreen />
       </div>
     </div>
   )

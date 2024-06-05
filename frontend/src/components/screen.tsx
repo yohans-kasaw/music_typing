@@ -2,10 +2,15 @@ import Test from './Test'
 import TopBar from './topBar'
 import { SongDetails } from '../domain/lyrics'
 import { useEffect, useState } from 'react'
+import {useSelector, useDispatch} from 'react-redux'
+import {fetchAllIds} from '../store/lyrics_slice'
+import { useGetAllIdsQuery } from '../store/lyrics_api'
 
 function screen() {
 
   const [songData, setSongData] = useState<SongDetails | null>(null);
+
+  let dispatch = useDispatch()
 
 
   useEffect(() => {
@@ -22,12 +27,21 @@ function screen() {
       }
     };
 
+    dispatch(fetchAllIds())
     fetchSongDetails();
   }, []);
+
+
+  const { data, error, isLoading } = useGetAllIdsQuery()
+  console.log('-------------')
+  console.log(data)
+  console.log(useSelector((state) => state))
+
 
   if (!songData) {
     return <div>Loading...</div>;
   }
+
 
   return (
     //flex flex-col items-center justify-center h-screen  text-white

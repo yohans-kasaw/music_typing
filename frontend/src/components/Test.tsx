@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import Letter from "./Letter";
-
 import { SongDetails } from "../domain/lyrics";
 
-function Test() {
+function Test({ songData }: { songData: SongDetails }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   let [currentText, setCurrentText] = useState("")
@@ -11,34 +10,11 @@ function Test() {
   let [wordIndex, setWordIndex] = useState(0)
   let [currentWordError, setCurrentWordError] = useState(false)
 
-  const [songData, setSongData] = useState<SongDetails | null>(null);
-
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, [songData]);
-
-  useEffect(() => {
-    const fetchSongDetails = async () => {
-      try {
-        const response = await fetch('/public/lyrics/Blinding.json');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data: SongDetails = await response.json();
-        setSongData(data);
-      } catch (error) {
-        throw new Error('Error fetching song details');
-      }
-    };
-
-    fetchSongDetails();
-  }, []);
-
-  if (!songData) {
-    return <div>Loading...</div>;
-  }
 
   const { lyrics } = songData;
 

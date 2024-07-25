@@ -1,41 +1,84 @@
 package routes
 
 import (
-    "github.com/YohansHailu/music_typing/backend/src/persistance"
-    "github.com/gin-gonic/gin"
+	"fmt"
+	"net/http"
+
+	"github.com/YohansHailu/music_typing/backend/src/models"
+	"github.com/YohansHailu/music_typing/backend/src/persistence"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type LyricsRouter struct {
-    repo *persistance.LyricsRepository
+	repo *persistence.LyricsRepository
 }
 
-func NewLyricsRouter() *LyricsRouter {
-    return &LyricsRouter{
-        repo: persistance.NewLyricsRepository(),  // Repository is instantiated within the Router
-    }
+func NewLyricsRouter(db *gorm.DB) *LyricsRouter {
+	return &LyricsRouter{
+		repo: persistence.NewLyricsRepository(db),
+	}
 }
 
 func (lr *LyricsRouter) GetLyrics(c *gin.Context) {
-    lyrics := lr.repo.GetLyrics()
-    c.JSON(200, lyrics)
+	lyrics, err := lr.repo.GetLyrics()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, lyrics)
 }
 
 func (lr *LyricsRouter) GetLyricsById(c *gin.Context) {
-    id := c.Param("id")
-    lyrics := lr.repo.GetLyricsById(id)
-    c.JSON(200, lyrics)
+	id := c.Param("id")
+	lyrics, err := lr.repo.GetLyricsById(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	if lyrics == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lyrics not found"})
+		return
+	}
+	c.JSON(http.StatusOK, lyrics)
 }
 
 func (lr *LyricsRouter) GetLyricsByTitle(c *gin.Context) {
-    title := c.Param("title")
-    lyrics := lr.repo.GetLyricsByTitle(title)
-    c.JSON(200, lyrics)
+	title := c.Param("title")
+	lyrics, err := lr.repo.GetLyricsByTitle(title)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if lyrics == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lyrics not found"})
+		return
+	}
+	c.JSON(http.StatusOK, lyrics)
 }
 
-func AddLyricsRoutes(router *gin.Engine) {
-    lyricsRouter := NewLyricsRouter()  // Instantiating the LyricsRouter
+// Endpoint to add lyrics
+func (lr *LyricsRouter) AddLyrics(c *gin.Context) {
+	var lyrics models.LyricsDetails
+	fmt.Println("Lyrics added successfully")
+	if err := c.BindJSON(&lyrics); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
 
-    router.GET("/lyrics", lyricsRouter.GetLyrics)
-    router.GET("/lyrics/:id", lyricsRouter.GetLyricsById)
-    router.GET("/lyrics/title/:title", lyricsRouter.GetLyricsByTitle)
+	createdLyrics, err := lr.repo.AddLyrics(lyrics)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, createdLyrics)
+}
+
+func AddLyricsRoutes(router *gin.Engine, db *gorm.DB) {
+	lyricsRouter := NewLyricsRouter(db)
+
+	router.GET("/lyrics", lyricsRouter.GetLyrics)
+	router.GET("/lyrics/:id", lyricsRouter.GetLyricsById)
+	router.GET("/lyrics/title/:title", lyricsRouter.GetLyricsByTitle)
+	router.POST("/lyrics", lyricsRouter.AddLyrics)
 }

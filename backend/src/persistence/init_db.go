@@ -1,4 +1,4 @@
-package persistance
+package persistence
 
 import (
 	"github.com/YohansHailu/music_typing/backend/src/models"

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "whatever_it_takes",
+    "lrcPath": "/lrc/whatever_it_takes.lrc",
+    "audioPath": "/audio/whatever_it_takes.mp3"
+  },
+  {
+    "name": "blinding",
+    "lrcPath": "/lrc/blinding.lrc",
+    "audioPath": "/audio/blinding.mp3"
+  },
+  {
+    "name": "sunflower",
+    "lrcPath": "/lrc/sunflower.lrc",
+    "audioPath": "/audio/sunflower.mp3"
+  },
+  {
+    "name": "demons",
+    "lrcPath": "/lrc/demons.lrc",
+    "audioPath": "/audio/demons.mp3"
+  }
+]

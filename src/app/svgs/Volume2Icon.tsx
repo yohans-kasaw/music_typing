@@ -1,7 +1,6 @@
-export default function Volume2Icon(props: any) {
+export default function Volume2Icon() {
   return (
     <svg
-      {...props}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"

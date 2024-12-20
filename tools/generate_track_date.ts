@@ -55,7 +55,7 @@ export function getFilePairs(): FilePair[] {
   return pairs;
 }
 
-function writeJsonTo(json: Record<string, any>, filePath: string): void {
+function writeJsonTo(json: Record<string, string>, filePath: string): void {
     try {
         const jsonString = JSON.stringify(json, null, 2); // Beautify JSON with 2 spaces
         fs.writeFileSync(filePath, jsonString, 'utf8');
@@ -66,6 +66,6 @@ function writeJsonTo(json: Record<string, any>, filePath: string): void {
 }
 
 const filePath: string = path.join(path.resolve(__dirname, '../public/data'), "typing_track_data.json");
-const object: Record<string, any> = getFilePairs();
+const object: Record<string, string> = getFilePairs();
 
 writeJsonTo(object, filePath);

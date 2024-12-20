@@ -21,7 +21,7 @@ function parseLRC(lrcContent: string): ParsedLRC {
     throw new Error("Empty LRC content provided.");
   }
 
-  lines.forEach((line, index) => {
+  lines.forEach((line) => {
     line = line.trim();
 
     // Parse metadata (e.g., [ti:Song Title])

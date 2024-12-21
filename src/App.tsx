@@ -96,8 +96,6 @@ function App() {
   const onLyricsSelect = useCallback((selectedName: string) => {
     setSelectedLyricsName(selectedName);
     setCurrentLineIndex(0); // Reset index when a new lyrics is selected
-    console.log("Selected lyrics:", selectedName);
-    console.log("current inedex:", currentLineIndex);
   }, []);
 
   const availableLyricsNames = useMemo(

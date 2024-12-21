@@ -21,6 +21,7 @@ const Typingverse: React.FC<TypingverseProps> = ({
   const [wordIndex, setWordIndex] = useState<number>(0);
   const [currentWordError, setCurrentWordError] = useState<boolean>(false);
 
+  console.log("current index and line inedx", initialIndex, lineIndex )
   // Extract lyrics from parsedLrc
   const { lyrics } = parsedLrc;
 
@@ -31,6 +32,10 @@ const Typingverse: React.FC<TypingverseProps> = ({
   useEffect(() => {
     inputRef.current?.focus();
   }, [lineIndex]);
+
+  useEffect(() => {
+    setLineIndex(initialIndex)
+  }, [initialIndex]);
 
   // Notify parent component about index changes
   useEffect(() => {
